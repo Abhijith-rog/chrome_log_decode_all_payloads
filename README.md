@@ -48,4 +48,67 @@ cd <repository_directory>
 python3 chrome_log_decode_all_payloads.py <log_file.json>
 ```
 
-## Input
+## Input Format
+
+The script expects a JSON log file with the following structure:
+
+```json
+{
+  "events": [
+    {
+      "time": "<timestamp>",
+      "source": { "id": "<source_id>" },
+      "params": { "<key>": "<base64_string>", ... }
+    },
+    ...
+  ]
+}
+```
+
+If the `"events"` key is missing or not a list, the script will exit with an error message.
+
+## Limitations
+
+- Assumes Base64 payloads can be decoded to UTF-8 text; non-UTF-8 data may result in garbled output (handled with error replacement).
+- Only processes payloads matching the regex `^[A-Za-z0-9+/=]{20,}$`.
+- CSV output excludes JSON data; only decoded text is included.
+
+## Error Handling
+
+- Validates the input JSON structure and exits with an error if invalid.
+- Safely handles missing or malformed `"source"` fields in events.
+- Catches and reports decoding errors in the output (e.g., invalid Base64 or decompression failures).
+- Prompts for confirmation before overwriting existing output files.
+
+## Example Output
+
+For an input file `example.json`, the script generates:
+
+- `example_decoded.txt`:
+  ```
+  [+] Base64 Payload Found
+  Time: 2025-07-18T12:00:00Z
+  Source ID: 12345
+  Field: payload
+  Decoded:
+  Sample decoded text
+  [JSON Detected]
+  {
+    "key": "value"
+  }
+  ================================================
+  ```
+
+- `example_decoded.csv`:
+  ```csv
+  time,source_id,field,decoded_text
+  2025-07-18T12:00:00Z,12345,payload,Sample decoded text
+  ```
+
+## Contributing
+
+Submit issues or pull requests via the repository for bug reports or feature suggestions.
+
+## License
+
+MIT License (see [LICENSE](LICENSE) file).
